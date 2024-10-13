@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using CinemaApp.Web.Infrastructure.Extensions;
 using CinemaApp.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace CinemaApp.Web
 {
@@ -21,14 +22,17 @@ namespace CinemaApp.Web
             });
 
             builder.Services
-            .AddDefaultIdentity<ApplicationUser>(cfg =>
+            .AddIdentity<ApplicationUser, IdentityRole<Guid>>(cfg =>
             {
 
             })
+            .AddEntityFrameworkStores<CinemaDbContext>()
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<CinemaDbContext>();
+            .AddSignInManager<SignInManager<ApplicationUser>>()
+            .AddUserManager<UserManager<ApplicationUser>>();
 
             builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
