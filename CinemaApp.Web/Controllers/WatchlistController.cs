@@ -9,6 +9,7 @@ using static CinemaApp.Common.EntityValidationConstants.Movie;
 
 namespace CinemaApp.Web.Controllers
 {
+    [Authorize]
     public class WatchlistController : BaseController
     {
         private readonly CinemaDbContext dbContext;
@@ -20,7 +21,7 @@ namespace CinemaApp.Web.Controllers
             this.userManager = userManager;
         }
 
-        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             string? userId = this.userManager.GetUserId(User);
@@ -40,6 +41,84 @@ namespace CinemaApp.Web.Controllers
                 .ToListAsync();
 
             return View(watchList);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToWatchlist(string movieId)
+        {
+            Guid movieGuid = Guid.Empty;
+
+            if (!this.IsGuidValid(movieId, ref movieGuid))
+            {
+                return this.RedirectToAction("Index", "Movie");
+            }
+
+            Movie? movie = await this.dbContext
+                .Movies
+                .FirstOrDefaultAsync(m => m.Id == movieGuid);
+
+            if (movie == null)
+            {
+                return this.RedirectToAction("Index", "Movie");
+            }
+
+            Guid userGuid = Guid.Parse(userManager.GetUserId(this.User)!);
+            bool alreadyAddedToWatchlist = await this.dbContext
+                .UsersMovies
+                .AnyAsync(um => um.ApplicationUserId == userGuid && 
+                    um.MovieId == movieGuid);
+
+            if (!alreadyAddedToWatchlist)
+            {
+                ApplicationUserMovie newUserMovie = new ApplicationUserMovie()
+                {
+                    ApplicationUserId = userGuid,
+                    MovieId = movieGuid,
+                };
+
+                await this.dbContext.UsersMovies.AddAsync(newUserMovie);
+                await this.dbContext.SaveChangesAsync();
+            }
+
+            return this.RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromWatchlist(string? movieId)
+        {
+            Guid movieGuid = Guid.Empty;
+
+            if (!this.IsGuidValid(movieId, ref movieGuid))
+            {
+                return this.RedirectToAction("Index", "Movie");
+            }
+
+            Movie? movie = await this.dbContext
+                .Movies
+                .FirstOrDefaultAsync(m => m.Id == movieGuid);
+
+            if (movie == null)
+            {
+                return this.RedirectToAction("Index", "Movie");
+            }
+
+            Guid userGuid = Guid.Parse(userManager.GetUserId(this.User)!);
+
+            ApplicationUserMovie? applicationUserMovie = await this.dbContext
+                .UsersMovies
+                .FirstOrDefaultAsync(um => um.ApplicationUserId == userGuid &&
+                    um.MovieId == movieGuid);
+
+            if (applicationUserMovie != null)
+            {
+                this.dbContext
+                    .UsersMovies
+                    .Remove(applicationUserMovie);
+
+                this.dbContext.SaveChanges();
+            }
+
+            return this.RedirectToAction(nameof(Index));
         }
     }
 }

@@ -28,7 +28,10 @@
                 <td>@movie.Genre</td>
                 <td>@movie.ReleaseDate</td>
                 <td>
-                    <a asp-action="RemoveFromWatchlist" asp-route-movieId="@movie.MovieId" class="btn btn-danger">Remove</a>
+                    <form asp-controller="Watchlist" asp-action="RemoveFromWatchlist" method="post" class="d-inline">
+                        <input type="hidden" name="movieId" value="@movie.MovieId" />
+                        <button type="submit" class="btn btn-danger">Remove</button>
+                    </form>
                 </td>
             </tr>
         }
