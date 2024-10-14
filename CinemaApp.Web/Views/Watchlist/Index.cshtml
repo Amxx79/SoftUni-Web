@@ -1,0 +1,36 @@
+﻿@using CinemaApp.Web.ViewModels.Watchlist
+@model IEnumerable<ApplicationUserWatchlistViewModel>
+
+@{
+    ViewData["Title"] = "Watchlist";
+}
+
+<h2>Your Watchlist</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Release Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var movie in Model)
+        {
+            <tr>
+                <td>
+                    <img src="@movie.ImageUrl" alt="@movie.Title" width="100" />
+                </td>
+                <td>@movie.Title</td>
+                <td>@movie.Genre</td>
+                <td>@movie.ReleaseDate</td>
+                <td>
+                    <a asp-action="RemoveFromWatchlist" asp-route-movieId="@movie.MovieId" class="btn btn-danger">Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
