@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CinemaApp.Common.EntityValidationConstants.Movie;
+using static CinemaApp.Common.ApplicationConstants;
 
 namespace CinemaApp.Data.Configuration
 {
@@ -32,6 +33,12 @@ namespace CinemaApp.Data.Configuration
                 .HasMaxLength(DescriptionMaxLength);
 
             builder.HasData(this.SeedMovies());
+
+            builder
+                .Property(m => m.ImageUrl)
+                .IsRequired(false)
+                .HasMaxLength(ImageUrlMaxLength)
+                .HasDefaultValue(NoImageUrl);
         }
 
         private List<Movie> SeedMovies()

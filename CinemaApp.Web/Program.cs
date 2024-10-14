@@ -1,9 +1,8 @@
 using CinemaApp.Data;
-using Microsoft.EntityFrameworkCore;
-using CinemaApp.Web.Infrastructure.Extensions;
 using CinemaApp.Data.Models;
+using CinemaApp.Web.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace CinemaApp.Web
 {
@@ -24,12 +23,17 @@ namespace CinemaApp.Web
             builder.Services
             .AddIdentity<ApplicationUser, IdentityRole<Guid>>(cfg =>
             {
-
+                ConfigureIdentity(cfg, builder);
             })
             .AddEntityFrameworkStores<CinemaDbContext>()
             .AddRoles<IdentityRole<Guid>>()
             .AddSignInManager<SignInManager<ApplicationUser>>()
             .AddUserManager<UserManager<ApplicationUser>>();
+
+            builder.Services.ConfigureApplicationCookie(cfg =>
+            {
+                cfg.LoginPath = "/Identity/Account/Login";
+            });
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -59,6 +63,22 @@ namespace CinemaApp.Web
 
             app.ApplyMigrations();
             app.Run();
+        }
+
+        private static void ConfigureIdentity(IdentityOptions cfg, WebApplicationBuilder builder)
+        {
+            cfg.Password.RequireDigit = builder.Configuration.GetValue<bool>("Identity:Password:RequireDigits");
+            cfg.Password.RequireLowercase = builder.Configuration.GetValue<bool>("Identity:Password:RequireLowerCase");
+            cfg.Password.RequireNonAlphanumeric = builder.Configuration.GetValue<bool>("Identity:Password:RequireNonAlphaNumerical");
+            cfg.Password.RequireUppercase = builder.Configuration.GetValue<bool>("Identity:Password:RequireUpperCase");
+            cfg.Password.RequiredLength = builder.Configuration.GetValue<int>("Identity:Password:RequireLength");
+            cfg.Password.RequiredUniqueChars = builder.Configuration.GetValue<int>("Identity:Password:RequireUniqueCharacters");
+
+            cfg.SignIn.RequireConfirmedAccount = builder.Configuration.GetValue<bool>("Identity:SignIn:RequireConfirmedAccount");
+            cfg.SignIn.RequireConfirmedEmail = builder.Configuration.GetValue<bool>("Identity:SignIn:RequireConfirmedEmail");
+            cfg.SignIn.RequireConfirmedPhoneNumber = builder.Configuration.GetValue<bool>("Identity:SignIn:RequireConfirmedPhoneNumber");
+
+            cfg.User.RequireUniqueEmail = builder.Configuration.GetValue<bool>("Identity:User:RequireUniqueEmail");
         }
     }
 }

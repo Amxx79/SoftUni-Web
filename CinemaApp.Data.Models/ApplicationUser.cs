@@ -14,6 +14,7 @@ namespace CinemaApp.Data.Models
             this.Id = Guid.NewGuid();
         }
 
-        //TODO: If we want, we can add additional properties to user
+        public virtual ICollection<ApplicationUserMovie> ApplicationUserMovies { get; set; }
+            = new HashSet<ApplicationUserMovie>();
     }
 }

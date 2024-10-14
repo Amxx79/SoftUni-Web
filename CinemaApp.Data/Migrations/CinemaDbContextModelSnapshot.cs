@@ -88,6 +88,21 @@ namespace CinemaApp.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("CinemaApp.Data.Models.ApplicationUserMovie", b =>
+                {
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MovieId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ApplicationUserId", "MovieId");
+
+                    b.HasIndex("MovieId");
+
+                    b.ToTable("UsersMovies");
+                });
+
             modelBuilder.Entity("CinemaApp.Data.Models.Cinema", b =>
                 {
                     b.Property<Guid>("Id")
@@ -111,19 +126,19 @@ namespace CinemaApp.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1fdcaa64-795f-48b8-aa63-eec779a42c96"),
+                            Id = new Guid("c92d1446-3ef6-4e93-9547-e5a7c4da7d8f"),
                             Location = "Sofia",
                             Name = "Cinema City"
                         },
                         new
                         {
-                            Id = new Guid("bbe6acbe-2b16-44c3-9348-2c30ecfb7216"),
+                            Id = new Guid("3d1b4a75-85f2-4153-bb43-7f9d4c9b8964"),
                             Location = "Plovdiv",
                             Name = "Cinema City"
                         },
                         new
                         {
-                            Id = new Guid("e6886b2c-6b6f-424e-b9e8-e769223774c9"),
+                            Id = new Guid("e4572d9f-edba-4ed7-9b81-ef720ea485ec"),
                             Location = "Varna",
                             Name = "CineMax"
                         });
@@ -173,6 +188,12 @@ namespace CinemaApp.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("ImageUrl")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)")
+                        .HasDefaultValue("~/images/no-image.jpg");
+
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
 
@@ -188,7 +209,7 @@ namespace CinemaApp.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1f4af55d-8d70-40d4-85d4-68b452890769"),
+                            Id = new Guid("c94f8c1f-0398-427a-8f81-3de7b223847a"),
                             Description = "If you wanna be a better rider , you should watch multiple times and practice... There is no cheap advices in Twist of the Wrist ; so scientific and practicable.",
                             Director = "Cheef",
                             Duration = 110,
@@ -198,7 +219,7 @@ namespace CinemaApp.Data.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a14d0fab-bf79-4cc3-9f4d-96cce54f56b6"),
+                            Id = new Guid("3da07a9d-1cda-4b81-8fe0-3896d080a498"),
                             Description = "When two small-town rival racers are forced to work together to defeat a reigning champion, it becomes survival of the fastest in an ultimate race to the finish line. Stars Brett Davern.",
                             Director = "Alex Ranarivelo",
                             Duration = 97,
@@ -287,12 +308,10 @@ namespace CinemaApp.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -328,12 +347,10 @@ namespace CinemaApp.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -341,6 +358,25 @@ namespace CinemaApp.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("CinemaApp.Data.Models.ApplicationUserMovie", b =>
+                {
+                    b.HasOne("CinemaApp.Data.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("ApplicationUserMovies")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CinemaApp.Data.Models.Movie", "Movie")
+                        .WithMany("MovieApplicationUsers")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Movie");
                 });
 
             modelBuilder.Entity("CinemaApp.Data.Models.CinemaMovie", b =>
@@ -413,6 +449,11 @@ namespace CinemaApp.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CinemaApp.Data.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("ApplicationUserMovies");
+                });
+
             modelBuilder.Entity("CinemaApp.Data.Models.Cinema", b =>
                 {
                     b.Navigation("CinemaMovies");
@@ -421,6 +462,8 @@ namespace CinemaApp.Data.Migrations
             modelBuilder.Entity("CinemaApp.Data.Models.Movie", b =>
                 {
                     b.Navigation("CinemaMovies");
+
+                    b.Navigation("MovieApplicationUsers");
                 });
 #pragma warning restore 612, 618
         }
